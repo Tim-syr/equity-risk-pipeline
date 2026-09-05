@@ -1,0 +1,10 @@
+.env
+.venv
+plan_projet_data_8_semaines.pdf
+
+__pycache__/
+*.pyc
+.pytest_cache/
+.vscode/
+.idea/
+

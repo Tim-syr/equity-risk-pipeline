@@ -9,7 +9,9 @@ connection_string = os.getenv("DATABASE_URL")
 try:
     with psycopg.connect(connection_string) as connection:
             with connection.cursor() as cursor:
-                  
+                print("sucessfully connected")
+
+                # put any table creation or reading here
     
                 connection.close()
 except Exception as reason:
