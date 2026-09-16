@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+import config
 
 def fetch_historical_data(ticker_list: list):
     """
@@ -29,6 +30,7 @@ def normalise_historical_data(raw_data: dict):
     adds ticker as a column, 
     trims Dividends and Stock Splits columns (aren't used in this project).
     Lowercases each name.
+    Rounds the numerical values to the 6th decimal (see why in docs/Difficulties.md, 1st week)
 
     Returns the dataset with all the tickers in one.
     '''
@@ -37,6 +39,9 @@ def normalise_historical_data(raw_data: dict):
     dataframe = dataframe.drop(["Dividends", "Stock Splits"], axis="columns") # deletes the columns
     dataframe = dataframe.rename(str.lower, axis="columns") # lowercase on every column name
     dataframe["date"] = dataframe["date"].dt.tz_localize(None) # simplifies the date to XXXX-XX-XX (removes the timezone)
+
+    float_columns = dataframe.select_dtypes(include='float').columns
+    dataframe[float_columns] = dataframe[float_columns].round(6)
     return dataframe
 
 
@@ -54,9 +59,8 @@ def get_dataframe(ticker_list: list):
 
 
 if __name__ == "__main__":
-    ticker_list = ["AI", "AIR", "BNP", "CAP", "CA", "BN", "ENGI", "MC", "ML", "ORA"]
 
-    dataframe = get_dataframe(ticker_list)
+    dataframe = get_dataframe(config.ticker_list)
     print("A QUICK LOOK AT THE DATAFRAME:\n\n")
     print(dataframe.head())
     print("\n\nDATAFRAME .INFO():\n\n")
