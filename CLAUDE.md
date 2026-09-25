@@ -25,14 +25,41 @@ code is recognition; writing it is production. Only the second one survives an i
    I type.
 3. **When I show you my code**, do not rewrite it. List: what is wrong, what is fragile,
    what you would have done differently and why. I make the corrections myself.
-4. **When I am stuck**, escalate one level at a time, waiting for my reply before moving on:
-   - level 1: a question that makes me find it myself ("what is in your DataFrame right
-     before that line?")
-   - level 2: the name of the function or concept to look up, without the syntax
-   - level 3: the signature or a usage example **outside the context of my project**
-   - level 4: a link to the official documentation
-   Only move to the next level if I have tried and asked again.
+4. **New notions**: whenever a new notion or function comes up, give a direct usage
+   example straight away, built on an unrelated dataset (a library, a shop, a school,
+   never this project's tables), together with a link to the official documentation so
+   I can read the source myself. Never refer back to an earlier example ("see above",
+   "like before"): show it again in full, because I don't have access to previous
+   replies while I work.
+   **Bugs in my own code**: show me what happens (run it if possible, quote the real
+   error), then lead with a question that makes me find the cause before handing me
+   the fix.
 5. **Do not run ahead.** If I ask about the current step, do not expand on the next one.
+   The plan's schedule decides when work is due, and that includes plumbing: do not
+   propose work from a later step, even config you are allowed to write. If I decide to
+   do something earlier than the plan says, that is my call.
+
+## How to communicate with me
+
+- **My level**: I know Python basics and very basic SQL. What I know of pandas and
+  Pydantic comes only from the code I wrote in this repository. Do not assume anything
+  beyond that.
+- **At most three points per reply.** If you have more (review findings, issues,
+  questions), give three, keep the rest queued, and bring them back three at a time
+  until the queue is empty. Nothing in the queue may be dropped. A point is closed when
+  I answer it, explicitly defer it, or change a file in a way that resolves it. If I
+  ask for a full table or list, give it in full.
+- **When I say I changed a file, or ask you to read one**, read it and check it in the
+  same reply, by running something when possible, not just by reading. If the change
+  resolves an open point, treat it as closed.
+
+## Project facts to respect
+
+- **SQL scripts in `sql/` are run on Neon only after review.** A committed script is not
+  necessarily applied. If it has not been run, a fix is an edit to the script; if it
+  has, the fix is a new numbered migration file. Ask me if you don't know.
+- **Style choices I keep on purpose**, do not flag them: parentheses around `if`
+  conditions, separate import lines, temporary status comments in files.
 
 ## What you may do freely
 

@@ -23,3 +23,11 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 -> Handled by yfinance, with .history, wich defaults to auto_adjust=True, so the close is adjusted for splits and dividends and past closes change after a corporate action.\
 -> Added a column updated_at for transparancy whenever it occures.
 -> Considering a price change whenever it changes by more than a millionth to its original price, because yfinance actually has a drift of about 1e-7 on its prices. 
+
+# Week 2
+
+**How should we organise bad rejected rows?**\
+->We use a new table, rejected_rows, that contains an id, a source, the raw data rejected as a json, the rejection reason, the time it was rejected at, and how many times it was rejected (source + row content as identifier) (in case we run at 2 different days with the same issue, prevents a duplicate line on every daily run while still recording that the problem came back). However it is worth noting that if yfinance adjusts a price, then we would get a new id for a new rejection since the prices won't match. That is intended, the table acts as a backlog, so it's fine. A counter keeps up with the amount of times we got the same rejected_row. The time it was rejected keeps the first instance of rejection.
+
+**Claude Code usage**\
+-> Reworked how it tutors me, decided to ask specifically for examples and the documentation pages, so I can take the time to read everything myself. I still write everything myself, but it is now allowed to execute parts of the code to seek edge cases, without touching my files or the database. 
