@@ -1,6 +1,6 @@
 CREATE TABLE rejected_rows(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- auto generated id, replaces the older SERIAL
-    source TEXT NOT NULL,
+    source TEXT NOT NULL REFERENCES sources (source_name),
     raw_data JSONB NOT NULL,
     rejection_reason TEXT NOT NULL,
     times_seen INT NOT NULL DEFAULT 1,
