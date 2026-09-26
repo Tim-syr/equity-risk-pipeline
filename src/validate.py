@@ -93,7 +93,10 @@ def dict_row_to_string(row: dict):
     return string_row
     
 
-def validate(raw_data: pandas.DataFrame) -> tuple:
+def validate(raw_data: pandas.DataFrame):
+    """
+    takes a pandas dataframe from extract.py and returns 2 lists, one containing valid rows, the other containing tuples of non valid row + reason
+    """
     # [{'ticker': 'XXXX', 'date': pandas_timestamp, 'open': X.XX, ...}, {...} ...]
     rows = raw_data.to_dict(orient="records")
 
@@ -107,8 +110,9 @@ def validate(raw_data: pandas.DataFrame) -> tuple:
             raw_prices_list.append(pydantic_row)
         except ValidationError as reason:
             rejected_list.append((dict_row_to_string(row), reason))
+            # {'ticker': str, 'date': str, 'open': "X.XX", ...}
     return (raw_prices_list, rejected_list)
 
 
 if __name__ == "__main__":
-    validate(extract.get_dataframe(config.ticker_list))
+    validate(extract.get_dataframe(config.TICKER_LIST))

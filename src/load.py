@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import extract
 import config
 import validate
+from psycopg.types.json import Jsonb
 
 
 def load_data(raw_prices_list, rejected_list):
@@ -28,6 +29,23 @@ def load_data(raw_prices_list, rejected_list):
                                OR abs(raw_prices.close - EXCLUDED.close) > abs(raw_prices.close)*1e-6\
                                OR abs(raw_prices.open - EXCLUDED.open) > abs(raw_prices.open)*1e-6",
                             [row.model_dump() for row in raw_prices_list])
+                            # {'ticker': str_value, ...}
+
+            connection.commit()
+
+            # invalid rows
+            iterable_rejected_rows = []
+            for row, reason in rejected_list:
+                new_row = {}
+                new_row['source'] = config.MAIN_API_SOURCE
+                new_row['rejection_reason']= str(reason) # reason comes from an except ValidationError as reason
+                new_row['raw_data'] = Jsonb(row)
+                iterable_rejected_rows.append(new_row)
+            
+            cursor.executemany("INSERT INTO rejected_rows (source, raw_data, rejection_reason) \
+                               VALUES (%(source)s, %(raw_data)s, %(rejection_reason)s) \
+                               ON CONFLICT (source, raw_data) DO UPDATE SET times_seen = rejected_rows.times_seen+1", 
+                            iterable_rejected_rows)
 
 if __name__ == "__main__":
-    load_data(*(validate.validate(extract.get_dataframe(config.ticker_list))))
+    load_data(*(validate.validate(extract.get_dataframe(config.TICKER_LIST))))
