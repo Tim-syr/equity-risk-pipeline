@@ -28,3 +28,9 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 
 **How should we organise bad rejected rows?**\
 ->We use a new table, rejected_rows, that contains an id, a source, the raw data rejected as a json, the rejection reason, the time it was rejected at, and how many times it was rejected (source + row content as identifier) (in case we run at 2 different days with the same issue, prevents a duplicate line on every daily run while still recording that the problem came back). However it is worth noting that if yfinance adjusts a price, then we would get a new id for a new rejection since the prices won't match. That is intended, the table acts as a backlog, so it's fine. A counter keeps up with the amount of times we got the same rejected_row. The time it was rejected keeps the first instance of rejection.
+
+**How to handle the source?**\
+-> I decided to add an other table with all the possible sources, with a source_name field that will be a foreign key for the rejected_rows table. That way, we ensure we won't have multiple rejected_rows that will have same source but differently named source.
+
+**Insertion**\
+-> Decided to insert valid rows, commit, and then insert invalid rows. Risk is that we may have valid rows updated while the invalid ones haven't gotten through. Advantage is that valid rows will be updated even if a part of the bad ones is broken. 
