@@ -60,7 +60,7 @@ def get_dataframe(ticker_list: list):
 
 if __name__ == "__main__":
 
-    dataframe = get_dataframe(config.ticker_list)
+    dataframe = get_dataframe(config.TICKER_LIST)
     print("A QUICK LOOK AT THE DATAFRAME:\n\n")
     print(dataframe.head())
     print("\n\nDATAFRAME .INFO():\n\n")

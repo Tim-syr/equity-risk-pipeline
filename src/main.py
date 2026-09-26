@@ -14,4 +14,4 @@ def call_pipeline(ticker_list: list):
 
 
 if __name__ == "__main__":
-    call_pipeline(config.ticker_list)
+    call_pipeline(config.TICKER_LIST)
