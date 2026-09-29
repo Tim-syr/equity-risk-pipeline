@@ -34,3 +34,6 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 
 **Insertion**\
 -> Decided to insert valid rows, commit, and then insert invalid rows. Risk is that we may have valid rows updated while the invalid ones haven't gotten through. Advantage is that valid rows will be updated even if a part of the bad ones is broken. 
+
+**Company names**\
+-> Decided to keep suffixes in the company names: they aren't the key, the ticker is, the company name is only for a human to read. A suffixe is therefor harmless. Saves a tiny bit of runtime too. 
