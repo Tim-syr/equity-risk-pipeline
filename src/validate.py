@@ -110,7 +110,6 @@ def validate(raw_data: pandas.DataFrame):
             raw_prices_list.append(pydantic_row)
         except ValidationError as reason:
             rejected_list.append((dict_row_to_string(row), reason))
-            # {'ticker': str, 'date': str, 'open': "X.XX", ...}
     return (raw_prices_list, rejected_list)
 
 
