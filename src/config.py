@@ -14,7 +14,8 @@ TICKER_SUFFIXE_LIST = [
     "KQ", "SS", "SZ", "TW", "SI", "KL", "JK", "BK", "NS", "BO", "AX", "NZ", "JO",
     "SR", "QA", "KW", "FP",
 ]
-
+'''
+# no longer useful, but kept in because it may be useful later
 COMPANY_SUFFIXE_LIST = [
     "sa", "sas", "sasu", "sarl", "eurl", "snc", "se",
     "gmbh", "ag", "kg", "ug",
@@ -23,5 +24,5 @@ COMPANY_SUFFIXE_LIST = [
     "bv", "nv", "spa", "srl", "sl", "ab", "oy", "oyj", "as", "aps",
     "pty ltd", "pte ltd", "sdn bhd", "co ltd", "sp z oo", "sa de cv", "sca",
 ]
-
+'''
 SECTOR_MAPPING = {"chimie": "chemicals", "aerospace & defense": "aerospace and defense", "banque": "finance", "services informatiques": "IT services", "distribution alimentaire": "retail", "agroalimentaire": "packaged food", "utilities": "utilities", "luxe": "luxury", "automobile": "car", "telecoms": "telecom", "banking": "finance", "services financiers": "finance"}
