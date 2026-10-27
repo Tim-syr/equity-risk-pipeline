@@ -1,6 +1,10 @@
 import yfinance as yf
 import pandas as pd
 import config
+import logging
+import time
+
+logger = logging.getLogger(__name__)
 
 def fetch_historical_data(ticker_list: list):
     """
@@ -18,10 +22,19 @@ def fetch_historical_data(ticker_list: list):
         try:
             ticker_yf = yf.Ticker(f"{ticker}.PA") #.pa for paris, all the tickers are from CAC 40
             ticker_historical_data[ticker] = ticker_yf.history(period="5y")
+            retries = 0
+            while (ticker_historical_data[ticker].empty and retries < config.MAX_RETRIES):
+                retries += 1
+                logger.warning(f"{ticker}: no data, retry {retries}/{config.MAX_RETRIES} in {config.RETRY_DELAY_SECONDS}s")
+                time.sleep(config.RETRY_DELAY_SECONDS)
+                ticker_historical_data[ticker] = ticker_yf.history(period="5y")
             if (ticker_historical_data[ticker].empty):
+                logger.warning(f"{ticker}: yfinance returned no data (delisted or misspelt?)")
                 failed_ticker_list.append(ticker)
+            else:
+                logger.info(f"{ticker} fetched successfully")
         except Exception as error:
-            print(f"{ticker}: yfinance request failed: {error}")
+            logger.error(f"{ticker}: yfinance request failed: {error}")
 
     return (ticker_historical_data, failed_ticker_list)
 

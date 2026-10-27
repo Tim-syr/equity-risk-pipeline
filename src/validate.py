@@ -4,6 +4,9 @@ import config
 import datetime
 from pydantic import model_validator, field_validator, ValidationError, Field
 import pandas
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PriceRecord(BaseModel):
     #ticker, date, open, high, low, close, volume
@@ -110,6 +113,7 @@ def validate(raw_data: pandas.DataFrame):
             raw_prices_list.append(pydantic_row)
         except ValidationError as reason:
             rejected_list.append((dict_row_to_string(row), reason))
+    logger.info("%d valid rows and %d invalid rows detected", len(raw_prices_list), len(rejected_list))
     return (raw_prices_list, rejected_list)
 
 

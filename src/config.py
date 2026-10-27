@@ -26,3 +26,7 @@ COMPANY_SUFFIXE_LIST = [
 ]
 '''
 SECTOR_MAPPING = {"chimie": "chemicals", "aerospace & defense": "aerospace and defense", "banque": "finance", "services informatiques": "IT services", "distribution alimentaire": "retail", "agroalimentaire": "packaged food", "utilities": "utilities", "luxe": "luxury", "automobile": "car", "telecoms": "telecom", "banking": "finance", "services financiers": "finance"}
+
+# amount of times it will send an extra request to yfinance in case the requested item is empty
+MAX_RETRIES = 3
+RETRY_DELAY_SECONDS = 1

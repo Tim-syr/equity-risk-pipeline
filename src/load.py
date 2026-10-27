@@ -5,6 +5,9 @@ import extract
 import config
 import validate
 from psycopg.types.json import Jsonb
+import logging
+
+logger = logging.getLogger(__name__)
 
 def insert_invalid_rows(cursor, rejected_list, source):
     '''
@@ -23,6 +26,7 @@ def insert_invalid_rows(cursor, rejected_list, source):
                         VALUES (%(source)s, %(raw_data)s, %(rejection_reason)s) \
                         ON CONFLICT (source, raw_data) DO UPDATE SET times_seen = rejected_rows.times_seen+1", 
                     iterable_rejected_rows)
+    logger.info("%d rows from %s written on rejected_rows", cursor.rowcount, source)
 
 def load_data(raw_prices_list, rejected_list, failed_ticker_list):
     """
@@ -47,6 +51,8 @@ def load_data(raw_prices_list, rejected_list, failed_ticker_list):
                                OR abs(raw_prices.open - EXCLUDED.open) > abs(raw_prices.open)*1e-6",
                             [row.model_dump() for row in raw_prices_list])
                             # {'ticker': str_value, ...}
+
+            logger.info("%d rows written on raw_prices", cursor.rowcount)
 
             connection.commit()
 
@@ -78,6 +84,7 @@ def load_company_information_data(correct_information_list: list, rejected_list:
                             [row.model_dump() for row in correct_information_list])
                             # {'ticker': str_value, ...}
 
+            logger.info("%d rows written on company_information", cursor.rowcount)
             connection.commit()
 
             insert_invalid_rows(cursor, rejected_list, "reference_assets")

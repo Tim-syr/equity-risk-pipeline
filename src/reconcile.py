@@ -3,6 +3,9 @@ import config
 from pathlib import Path
 from pydantic import BaseModel, field_validator, ValidationError
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 ISIN_RE = re.compile(r"[A-Z]{2}[A-Z0-9]{9}[0-9]")
 
@@ -101,9 +104,20 @@ def split_dataframes(clean_dataframe, raw_dataframe):
     for i in range(len(clean_rows)):
         try:
             pydantic_row = CsvData(**clean_rows[i])
+            if pydantic_row.isin is None:
+                logger.warning(f"{pydantic_row.ticker} has no isin")
             accepted_data_list.append(pydantic_row)
         except ValidationError as reason:
             rejected_data_list.append((raw_rows[i], reason))
+    
+    logger.info("%d accepted rows and %d rejected rows from the csv file", len(accepted_data_list), len(rejected_data_list))
+
+    accepted_ticker_set = set()
+    for row in accepted_data_list:
+        accepted_ticker_set.add(row.ticker)
+    unmatched_ticker_set = set(config.TICKER_LIST) - accepted_ticker_set
+    for ticker in sorted(unmatched_ticker_set):
+        logger.warning(f"{ticker} is in TICKER_LIST but has no valid reference row")
     return (accepted_data_list, rejected_data_list)
 
 if __name__ == "__main__":
