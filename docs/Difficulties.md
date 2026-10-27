@@ -1,4 +1,4 @@
-# Week 1
+# Step 1: Database foundation, idempotent ingestion
 
 ### MISSING THE YFINANCE PRICE ADJUSTMENT HANDLING
 Initial plan only included ingested_at column. It was getting updated only once, at ingestion. However, if a value gets updated, we loose track of when it was changed comparing to the first ingestion. \
@@ -10,7 +10,7 @@ Yfinance returns floats with many decimals. The python's double precision (float
 
 Rest wasn't much of a trouble.
 
-# Week 2
+# Step 2: Data quality, rejects, reference file reconciliation
 
 ### REJECTED DATA MANAGEMENT
 I wanted to store the rows that aren't valid. Mainly done in validate.py, I had to process a ton of information about how pydantic really works and the type of data used. A lot of struggle to pass around the correct types and structures, but the result in validate.py looks clean. 
