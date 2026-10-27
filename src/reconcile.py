@@ -15,11 +15,13 @@ class CsvData(BaseModel):
     isin: str | None = None # kind of an optional field anyway, so we won't reject a valuable row just because the isin isn't there
     # There will be a warning in the logging for a missing isin
 
-    @field_validator("ticker", mode="after")
+    @field_validator("ticker", mode="before")
     @classmethod
     def ticker_in_ticker_list(cls, ticker: str):
+        if ticker is None:
+            raise ValueError("invalid ticker name: ticker is empty.")
         if not(ticker in config.TICKER_LIST):
-            raise ValueError("ticker is not in the ticker list from config.")
+            raise ValueError("invalid ticker name: ticker is not in the ticker list from config.")
         return ticker
 
     @field_validator("company_name", mode="before") # we use before so that a None value doesn't get rejected (and lets us use our custom message)
