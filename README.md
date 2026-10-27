@@ -14,8 +14,8 @@ and the problems met along the way in [docs/Difficulties.md](docs/Difficulties.m
 | Steps | Topic | State |
 |---|---|---|
 | 1 | Database foundation, idempotent ingestion | done |
-| 2 | Data quality, rejects, reference file reconciliation | in progress |
-| 3 | Financial indicators and tests | to do |
+| 2 | Data quality, rejects, reference file reconciliation | done |
+| 3 | Financial indicators and tests | just started |
 | 4 | Star schema | to do |
 | 5–6 | Power BI reporting | to do |
 | 7 | Automation (GitHub Actions) | to do |
