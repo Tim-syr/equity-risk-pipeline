@@ -10,16 +10,21 @@ def fetch_historical_data(ticker_list: list):
     returns a dictionary with ticker name as key, and yf.history as value.
     """
     ticker_historical_data = {}
+    
+    failed_ticker_list = []
 
     # using memory because small set, would have to dynamically put it in the database if there were more tickers or more information
     for ticker in ticker_list:
         try:
             ticker_yf = yf.Ticker(f"{ticker}.PA") #.pa for paris, all the tickers are from CAC 40
             ticker_historical_data[ticker] = ticker_yf.history(period="5y")
-        except Exception:
-            print(f"{ticker} was not found and could not be included in the dataframe.")
+            if (ticker_historical_data[ticker].empty):
+                failed_ticker_list.append(ticker)
+        except Exception as error:
+            print(f"{ticker}: yfinance request failed: {error}")
 
-    return ticker_historical_data
+    return (ticker_historical_data, failed_ticker_list)
+
 
 
 def normalise_historical_data(raw_data: dict):
@@ -51,16 +56,16 @@ def get_dataframe(ticker_list: list):
     ticker , date , open , high , low , close , volume
     """
     # historical data fetch
-    ticker_historical_data = fetch_historical_data(ticker_list)
+    ticker_historical_data, failed_ticker_list = fetch_historical_data(ticker_list)
     # normalisation
     dataframe = normalise_historical_data(ticker_historical_data)
 
-    return dataframe
+    return (dataframe, failed_ticker_list)
 
 
 if __name__ == "__main__":
 
-    dataframe = get_dataframe(config.TICKER_LIST)
+    dataframe, failed_ticker_list = get_dataframe(config.TICKER_LIST)
     print("A QUICK LOOK AT THE DATAFRAME:\n\n")
     print(dataframe.head())
     print("\n\nDATAFRAME .INFO():\n\n")

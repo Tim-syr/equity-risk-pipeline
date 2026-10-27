@@ -114,4 +114,4 @@ def validate(raw_data: pandas.DataFrame):
 
 
 if __name__ == "__main__":
-    validate(extract.get_dataframe(config.TICKER_LIST))
+    validate(extract.get_dataframe(config.TICKER_LIST)[0])
