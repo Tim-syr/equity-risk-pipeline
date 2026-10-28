@@ -7,5 +7,3 @@ CREATE TABLE rejected_rows(
     rejected_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (source, raw_data)
 );
-
--- this is not run on the database yet, will do once the whole rejected rows scripts will be in place
