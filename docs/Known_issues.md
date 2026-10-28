@@ -19,8 +19,3 @@ ticker comes back empty and the run hits this crash, with nothing recorded.
 A gap is a day on which the other tickers have a price and one ticker has none (the row
 does not exist, so there is no NULL to look for). Weekends and market holidays are not
 gaps: no ticker has a price on those days. Planned as a data quality check in Power BI.
-
-### Scripts 03 to 05 are not applied on Neon yet
-`sources`, `rejected_rows` and `company_information` only exist in the scripts. Until
-they are applied (in order), any run that inserts rejected rows or reference data fails
-on Neon.

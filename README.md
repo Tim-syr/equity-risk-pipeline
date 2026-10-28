@@ -15,8 +15,8 @@ and the problems met along the way in [docs/Difficulties.md](docs/Difficulties.m
 |---|---|---|
 | 1 | Database foundation, idempotent ingestion | done |
 | 2 | Data quality, rejects, reference file reconciliation | done |
-| 3 | Financial indicators and tests | just started |
-| 4 | Star schema | to do |
+| 3 | Financial indicators and tests | done |
+| 4 | Star schema | just started |
 | 5–6 | Power BI reporting | to do |
 | 7 | Automation (GitHub Actions) | to do |
 | 8 | Documentation and finalisation | to do |
@@ -29,7 +29,8 @@ and the problems met along the way in [docs/Difficulties.md](docs/Difficulties.m
 - pandas 3.0
 - Pydantic 2.13
 - yfinance 1.7
-- Planned: pytest, Power BI, GitHub Actions
+- pytest 9.2
+- Planned: Power BI, GitHub Actions
 
 ## How it works
 
@@ -103,9 +104,10 @@ Empty cells become `NULL` before validation. A rejected row is stored with its o
 ```
 data/   reference_assets.csv, the hand-typed, deliberately messy reference file
 docs/   decisions, difficulties
+scripts/ one-off utilities, not part of the pipeline (check_connection.py: database reachability check)
 sql/    numbered DDL scripts, applied in order
-src/    pipeline code (config, extract, validate, reconcile, load, main)
-tests/  tests (pytest suite planned for step 3)
+src/    pipeline code (config, extract, validate, reconcile, transform, load, main)
+tests/  pytest suite for the financial indicators (transform.py)
 ```
 
 ## Running it locally

@@ -37,3 +37,11 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 
 **Company names**\
 -> Decided to keep suffixes in the company names: they aren't the key, the ticker is, the company name is only for a human to read. A suffixe is therefor harmless. Saves a tiny bit of runtime too. 
+
+# Step 3: Financial indicators and tests
+
+**Which indicators?**\
+-> Took some basic indicators, main point is to manipulate the dataframe and have some values to display later. I took: log change, 21d volatility (the previous month in trading days basically), and the drawdown. They will be stored in an sql table and used for displaying purposes, may add more later. 
+
+**Calculation source**\
+-> Decided to fetch the raw_prices table: allows us to have metrics on longer period than 5y (all fetched data) and makes sure the data is already cleaned. It does however cost an extra querry (and a python transition).
