@@ -5,6 +5,7 @@ import load
 import reconcile
 from pathlib import Path
 import logging
+import transform
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -32,7 +33,21 @@ def upsert_reference_assets():
     accepted_data_list, rejected_data_list = reconcile.split_dataframes(clean_dataframe, dataframe)
     load.load_company_information_data(accepted_data_list, rejected_data_list)
     logger.info("upsert of reference_assets ended")
+
+def call_daily_metrics_pipeline():
+    """
+    Calls the functions necessary for extracting raw_prices, adding the metrics, and upserting them.
+    """
+    logger.info("call_daily_metrics_pipeline initiated")
+    dataframe = extract.get_raw_prices_dataframe()
+    dataframe = transform.add_daily_metrics(dataframe)
+    dataframe = transform.nan_to_null(dataframe)
+
+    load.load_daily_metrics(dataframe.to_dict(orient="records"))
+    logger.info("call_daily_metrics_pipeline ended")
     
+
 
 if __name__ == "__main__":
     call_pipeline(config.TICKER_LIST)
+    call_daily_metrics_pipeline()

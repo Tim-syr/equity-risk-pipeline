@@ -3,6 +3,9 @@ import pandas as pd
 import config
 import logging
 import time
+import psycopg
+from dotenv import load_dotenv
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +78,25 @@ def get_dataframe(ticker_list: list):
 
     return (dataframe, failed_ticker_list)
 
+def get_raw_prices_dataframe() -> pd.DataFrame:
+    """
+    Fetches historical prices from raw_prices table and returns a pandas dataframe
+    (only ticker, date and close are really useable for calculation right now)
+    """
+    load_dotenv()
+    connection_string = os.getenv("DATABASE_URL")
+
+    with psycopg.connect(connection_string) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT ticker, date, close FROM raw_prices")
+            rows = cursor.fetchall()
+            column_names = [column.name for column in cursor.description]
+            logger.info("%d entries fetched from raw_prices", len(rows))
+
+    dataframe = pd.DataFrame(rows, columns=column_names)
+    dataframe["close"] = dataframe["close"].astype(float)
+
+    return dataframe
 
 if __name__ == "__main__":
 

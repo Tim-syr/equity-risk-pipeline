@@ -4,6 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator, ValidationError
 import re
 import logging
+import transform
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +92,8 @@ def normalise_dataframe(raw_dataframe):
     return clean_dataframe
 
 def split_dataframes(clean_dataframe, raw_dataframe):
-    clean_dataframe = clean_dataframe.astype(object).where(clean_dataframe.notna(), None) # replaces the False from the notna by None value, for conversion purposes
-    raw_dataframe = raw_dataframe.astype(object).where(raw_dataframe.notna(), None)
+    clean_dataframe = transform.nan_to_null(clean_dataframe)
+    raw_dataframe = transform.nan_to_null(raw_dataframe)
 
     clean_rows = clean_dataframe.to_dict(orient="records")
     # [{'ticker': 'XXXX', 'company_name': 'blablabla'

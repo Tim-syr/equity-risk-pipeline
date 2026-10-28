@@ -89,6 +89,25 @@ def load_company_information_data(correct_information_list: list, rejected_list:
 
             insert_invalid_rows(cursor, rejected_list, "reference_assets")
 
+def load_daily_metrics(dataframe_todict: list[dict]):
+    """
+    Pushes the calculated daily metrics to the database (daily_metrics table)
+    """
+    load_dotenv()
+    connection_string = os.getenv("DATABASE_URL")
+
+    with psycopg.connect(connection_string) as connection:
+        with connection.cursor() as cursor:
+
+            cursor.executemany("INSERT INTO daily_metrics (ticker, date, log_change, volatility_21, drawdown) \
+                                    VALUES (%(ticker)s, %(date)s, %(log_change)s, %(volatility_21)s, %(drawdown)s) \
+                                    ON CONFLICT (ticker, date) DO UPDATE SET log_change = EXCLUDED.log_change, volatility_21 = EXCLUDED.volatility_21, drawdown = EXCLUDED.drawdown, updated_at = now() \
+                                        WHERE daily_metrics.log_change IS DISTINCT FROM EXCLUDED.log_change\
+                                        OR daily_metrics.volatility_21 IS DISTINCT FROM EXCLUDED.volatility_21\
+                                        OR daily_metrics.drawdown IS DISTINCT FROM EXCLUDED.drawdown",
+                                    dataframe_todict)
+
+            logger.info("%d rows written on daily_metrics", cursor.rowcount)
 
 if __name__ == "__main__":
     dataframe, failed_ticker_list = extract.get_dataframe(config.TICKER_LIST)
