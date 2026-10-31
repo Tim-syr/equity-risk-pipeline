@@ -45,3 +45,9 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 
 **Calculation source**\
 -> Decided to fetch the raw_prices table: allows us to have metrics on longer period than 5y (all fetched data) and makes sure the data is already cleaned. It does however cost an extra querry (and a python transition).
+
+# Step 4: Star schema
+
+**a date is a dimension**\
+-> What should be the id? Decision is mainly deciding wether we make it a counter or YYYYMMDD format. Having 2 entries for a date makes no sense: the date won't change. Even if we add an other stock exchange (like ny for example), that would add a column for the is_trading_day_ny, not a new meaning for the date. It therefor should be YYYYMMDD and computed from the full DATE. 
+->What range covered? We'll start from January the 1st of 2021 and up til December 31st 2035. It's very light for the db and covers a good chunk of data. 
