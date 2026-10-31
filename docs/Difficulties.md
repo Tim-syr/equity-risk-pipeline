@@ -14,3 +14,9 @@ Rest wasn't much of a trouble.
 
 ### REJECTED DATA MANAGEMENT
 I wanted to store the rows that aren't valid. Mainly done in validate.py, I had to process a ton of information about how pydantic really works and the type of data used. A lot of struggle to pass around the correct types and structures, but the result in validate.py looks clean. 
+
+# Step 3: Financial indicators and tests
+
+### Role decision
+It was a bit complicated to assign a role to each file: who will run the connection? Who calls who? Why would a function be here and not in an other file? In the end, reffering to the names is what helped me the most, and made the pipeline split easier. 
+
