@@ -20,3 +20,7 @@ I wanted to store the rows that aren't valid. Mainly done in validate.py, I had 
 ### Role decision
 It was a bit complicated to assign a role to each file: who will run the connection? Who calls who? Why would a function be here and not in an other file? In the end, reffering to the names is what helped me the most, and made the pipeline split easier. 
 
+# Step 4: Star schema
+
+### Sql and star schema
+I didn't know what star schema was at all! So I took a short course to understand the concepts. Implementing it concretely in sql took therefor longer. Add my rusty sql skills in, and you have the recipe for struggle. After the step 4 started, it took 6hours for the 2 first sql scripts to appear. However, the last ones were written almost in one go, which was very satisfying. 
