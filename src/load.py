@@ -109,6 +109,27 @@ def load_daily_metrics(dataframe_todict: list[dict]):
 
             logger.info("%d rows written on daily_metrics", cursor.rowcount)
 
+
+def load_dim_asset():
+    """
+    Function updating dim_asset according to company_information table.
+    """
+    load_dotenv()
+    connection_string = os.getenv("DATABASE_URL")
+
+    with psycopg.connect(connection_string) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""INSERT INTO dim_asset (ticker, isin, company_name, sector, country, currency)
+            SELECT ticker, isin, company_name, sector, LEFT(isin, 2), 'EUR'
+            FROM company_information ON CONFLICT (ticker) DO UPDATE SET isin = EXCLUDED.isin, company_name = EXCLUDED.company_name, sector = EXCLUDED.sector, country = EXCLUDED.country, currency = EXCLUDED.currency
+            WHERE dim_asset.isin IS DISTINCT FROM EXCLUDED.isin 
+            OR dim_asset.company_name IS DISTINCT FROM EXCLUDED.company_name
+            OR dim_asset.sector IS DISTINCT FROM EXCLUDED.sector
+            OR dim_asset.country IS DISTINCT FROM EXCLUDED.country
+            OR dim_asset.currency IS DISTINCT FROM EXCLUDED.currency""")
+
+            logger.info("%d rows written on dim_asset", cursor.rowcount)
+
 if __name__ == "__main__":
     dataframe, failed_ticker_list = extract.get_dataframe(config.TICKER_LIST)
     raw_prices_list, rejected_list = validate.validate(dataframe)

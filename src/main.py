@@ -32,6 +32,7 @@ def upsert_reference_assets():
     clean_dataframe = reconcile.normalise_dataframe(dataframe)
     accepted_data_list, rejected_data_list = reconcile.split_dataframes(clean_dataframe, dataframe)
     load.load_company_information_data(accepted_data_list, rejected_data_list)
+    load.load_dim_asset()
     logger.info("upsert of reference_assets ended")
 
 def call_daily_metrics_pipeline():
