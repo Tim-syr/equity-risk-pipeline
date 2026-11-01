@@ -22,3 +22,6 @@ gaps: no ticker has a price on those days. Planned as a data quality check in Po
 
 ### Renamed tickers have to be manually updated in dim_asset
 The machinery isn't built because for tickers from CAC 40, it's very rare and would take 2 single lines of UPDATE whenever it happens. 
+
+### Every ticker in TICKER_LIST needs a valid reference row, except one at most
+A ticker whose reference row is missing or rejected is loaded under the unknown member (asset_id = -1). If two such tickers have a price on the same day, they produce the same key (date_id, -1) and the fact load fails with "ON CONFLICT DO UPDATE command cannot affect row a second time". Today only CA (Carrefour, empty ticker in the reference file) is in this case. Fix: correct the reference file and rerun upsert_reference_assets.
