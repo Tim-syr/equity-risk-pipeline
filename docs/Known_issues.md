@@ -19,3 +19,6 @@ ticker comes back empty and the run hits this crash, with nothing recorded.
 A gap is a day on which the other tickers have a price and one ticker has none (the row
 does not exist, so there is no NULL to look for). Weekends and market holidays are not
 gaps: no ticker has a price on those days. Planned as a data quality check in Power BI.
+
+### Renamed tickers have to be manually updated in dim_asset
+The machinery isn't built because for tickers from CAC 40, it's very rare and would take 2 single lines of UPDATE whenever it happens. 
