@@ -50,4 +50,4 @@ Naturally, you set the primary key as a couple, allowing you to distinguish ever
 
 **a date is a dimension**\
 -> What should be the id? Decision is mainly deciding wether we make it a counter or YYYYMMDD format. Having 2 entries for a date makes no sense: the date won't change. Even if we add an other stock exchange (like ny for example), that would add a column for the is_trading_day_ny, not a new meaning for the date. It therefor should be YYYYMMDD and computed from the full DATE. 
-->What range covered? We'll start from January the 1st of 2021 and up til December 31st 2035. It's very light for the db and covers a good chunk of data. 
+->What range covered? We'll start from January the 1st of 2021 and up til December 31st 2035. It's very light for the db and covers a good chunk of data. Manually added the recurrent holidays because it's just pure data.
