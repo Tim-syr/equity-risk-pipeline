@@ -130,6 +130,33 @@ def load_dim_asset():
 
             logger.info("%d rows written on dim_asset", cursor.rowcount)
 
+def load_fact_daily_prices():
+    """
+    Function upserting fact_daily_prices from raw_prices, dim_date, dim_asset and daily_metrics tables.
+    It's the fact table that will be used in data visualisation.
+    """
+    load_dotenv()
+    connection_string = os.getenv("DATABASE_URL")
+
+    with psycopg.connect(connection_string) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""INSERT INTO fact_daily_prices (date_id, asset_id, close, volume, log_change, volatility_21, drawdown)
+            SELECT dim_date.date_id, COALESCE(dim_asset.asset_id, -1), raw_prices.close, raw_prices.volume, daily_metrics.log_change, daily_metrics.volatility_21, daily_metrics.drawdown
+            FROM raw_prices
+            JOIN dim_date ON dim_date.full_date = raw_prices.date
+            LEFT JOIN dim_asset ON dim_asset.ticker = raw_prices.ticker
+            JOIN daily_metrics ON daily_metrics.ticker = raw_prices.ticker
+            AND daily_metrics.date = raw_prices.date
+            ON CONFLICT (date_id, asset_id) DO UPDATE SET close = EXCLUDED.close, volume = EXCLUDED.volume, log_change = EXCLUDED.log_change, volatility_21 = EXCLUDED.volatility_21, drawdown = EXCLUDED.drawdown
+            WHERE fact_daily_prices.close IS DISTINCT FROM EXCLUDED.close 
+            OR fact_daily_prices.volume IS DISTINCT FROM EXCLUDED.volume
+            OR fact_daily_prices.log_change IS DISTINCT FROM EXCLUDED.log_change
+            OR fact_daily_prices.volatility_21 IS DISTINCT FROM EXCLUDED.volatility_21
+            OR fact_daily_prices.drawdown IS DISTINCT FROM EXCLUDED.drawdown""")
+
+            logger.info("%d rows written on fact_daily_prices", cursor.rowcount)
+
+
 if __name__ == "__main__":
     dataframe, failed_ticker_list = extract.get_dataframe(config.TICKER_LIST)
     raw_prices_list, rejected_list = validate.validate(dataframe)

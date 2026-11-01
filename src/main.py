@@ -52,3 +52,4 @@ def call_daily_metrics_pipeline():
 if __name__ == "__main__":
     call_pipeline(config.TICKER_LIST)
     call_daily_metrics_pipeline()
+    load.load_fact_daily_prices()
