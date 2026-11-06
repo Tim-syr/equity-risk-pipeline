@@ -138,4 +138,4 @@ I used Claude Code as a tutor rather than a code generator: it explains, reviews
 questions, under the rules set out in [CLAUDE.md](CLAUDE.md). It writes code only when I
 explicitly ask, which is very rare (<1% in the codebase). The aim is to be able to explain and rewrite every part of
 this project without assistance.\
- Although decisions and difficulties are hand-written, the readme file is mostly written by claude, for presentation purposes.
+ The decision and difficulty logs are written by hand; this README was drafted with Claude and reviewed by me.
