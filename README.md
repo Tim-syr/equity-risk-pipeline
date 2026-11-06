@@ -2,24 +2,12 @@
 
 A data pipeline that ingests daily equity prices for ten CAC 40 companies, controls their
 quality, reconciles them with a deliberately imperfect reference file, and loads everything
-into a hosted PostgreSQL database. Later stages add financial indicators, a star schema,
-Power BI reporting and automation.
+into a hosted PostgreSQL database. It then computes daily risk indicators and models
+everything as a star schema. Power BI reporting and automation come next.
 
 This is a portfolio project built over a few months while preparing applications for a data
 apprenticeship. Every design choice is recorded in [docs/Decisions.md](docs/Decisions.md),
 and the problems met along the way in [docs/Difficulties.md](docs/Difficulties.md).
-
-## Status
-
-| Steps | Topic | State |
-|---|---|---|
-| 1 | Database foundation, idempotent ingestion | done |
-| 2 | Data quality, rejects, reference file reconciliation | done |
-| 3 | Financial indicators and tests | done |
-| 4 | Star schema | in progress |
-| 5–6 | Power BI reporting | to do |
-| 7 | Automation (GitHub Actions) | to do |
-| 8 | Documentation and finalisation | to do |
 
 ## Stack
 
@@ -34,7 +22,7 @@ and the problems met along the way in [docs/Difficulties.md](docs/Difficulties.m
 
 ## How it works
 
-There are two flows, which share one `rejected_rows` table.
+There are three flows. The first two share one `rejected_rows` table.
 
 **Prices**, run by `src/main.py` (`call_pipeline`):
 
@@ -49,16 +37,26 @@ yfinance ──► extract.py ──► validate.py ──► load.py ──► 
 **Reference data**, run on demand (`upsert_reference_assets` in `src/main.py`):
 
 ```
-data/reference_assets.csv ──► reconcile.py ──► load.py ──► company_information
-                              normalise with    upsert
+data/reference_assets.csv ──► reconcile.py ──► load.py ──► company_information ──► dim_asset
+                              normalise with    upsert                              upsert (SQL)
                               pandas, validate       │
                               with Pydantic          │
                                    └── invalid ──────┴──► rejected_rows
 ```
 
+**Indicators and star schema**, run by `src/main.py` after the prices:
+
+```
+raw_prices ──► transform.py ──► daily_metrics
+               log change, 21-day volatility, drawdown (pandas)
+
+raw_prices + daily_metrics + dim_date + dim_asset ──► fact_daily_prices ──► v_portfolio_overview
+                                                      upsert (SQL)           view for Power BI
+```
+
 ### Design principles
 
-- **Idempotent loads.** Running the pipeline twice inserts nothing new. Both loads use
+- **Idempotent loads.** Running the pipeline twice inserts nothing new. Every load uses
   `INSERT ... ON CONFLICT DO UPDATE`, and a row is only rewritten (and its `updated_at`
   moved) when a value really changed.
 - **Rejected data is traced, never dropped.** Invalid rows are stored as JSON with their
@@ -66,6 +64,18 @@ data/reference_assets.csv ──► reconcile.py ──► load.py ──► com
   duplicate.
 - **Raw input is not cleaned by hand.** The reference file stays messy on purpose: the
   pipeline is responsible for normalising it.
+
+## Status
+
+| Steps | Topic | State |
+|---|---|---|
+| 1 | Database foundation, idempotent ingestion | done |
+| 2 | Data quality, rejects, reference file reconciliation | done |
+| 3 | Financial indicators and tests | done |
+| 4 | Star schema | in progress: tables, loads and view written and tested on a local PostgreSQL, not yet applied on Neon; coherence checks to write |
+| 5–6 | Power BI reporting | to do |
+| 7 | Automation (GitHub Actions) | to do |
+| 8 | Documentation and finalisation | to do |
 
 ## Data model
 
@@ -75,8 +85,22 @@ data/reference_assets.csv ──► reconcile.py ──► load.py ──► com
 | `company_information` | Company name, sector, ISIN per ticker, from the reference file | `ticker` |
 | `rejected_rows` | Any row that failed validation, as JSONB, with reason and `times_seen` | identity `id`, unique `(source, raw_data)` |
 | `sources` | Allowed values for `rejected_rows.source` | `source_name` |
+| `daily_metrics` | Log change, 21-day annualised volatility and drawdown per ticker and day | `(ticker, date)` |
 
 Prices are stored as `NUMERIC` rather than floating point, so that decimal values are exact.
+Calculated indicators are `DOUBLE PRECISION`.
+
+### Star schema (step 4)
+
+Written and tested on a local PostgreSQL, not yet applied on Neon.
+
+| Table | Role | Content | Key |
+|---|---|---|---|
+| `fact_daily_prices` | fact | Close, volume and the three indicators. Grain: one asset, one day | `(date_id, asset_id)`, foreign keys to both dimensions |
+| `dim_date` | dimension | One row per calendar day, 2021 to 2035: year, quarter, month, weekday, `is_trading_day` | `date_id` as `YYYYMMDD` |
+| `dim_asset` | dimension | Ticker, ISIN, company name, sector, country, currency. Name changes overwrite the old value (SCD type 1). Unknown member `asset_id = -1`, so a price is never lost for lack of a reference row | identity `asset_id`, unique `ticker` |
+| `euronext_holidays` | reference | Euronext Paris closing days, used to compute `is_trading_day` | `date` |
+| `v_portfolio_overview` | view | The fact table joined to both dimensions, with readable columns, for Power BI | |
 
 ## Data quality rules
 
@@ -105,7 +129,7 @@ Empty cells become `NULL` before validation. A rejected row is stored with its o
 data/   reference_assets.csv, the hand-typed, deliberately messy reference file
 docs/   decisions, difficulties
 scripts/ one-off utilities, not part of the pipeline (check_connection.py: database reachability check)
-sql/    numbered DDL scripts, applied in order
+sql/    numbered migration scripts (tables, seed data, view), applied in order
 src/    pipeline code (config, extract, validate, reconcile, transform, load, main)
 tests/  pytest suite for the financial indicators (transform.py)
 ```
@@ -121,13 +145,14 @@ tests/  pytest suite for the financial indicators (transform.py)
 2. Copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection
    string.
 3. Run the scripts in `sql/` in numerical order on the database.
-4. Load the prices:
-   ```
-   python src/main.py
-   ```
-5. Load the reference data (on demand), from `src/`:
+4. Load the reference data, from `src/`. Do it first: the fact load needs `dim_asset`
+   filled, otherwise every price lands on the unknown member.
    ```
    python -c "import main; main.upsert_reference_assets()"
+   ```
+5. Load the prices, the indicators and the fact table:
+   ```
+   python src/main.py
    ```
 
 The tickers, the sector mapping and the data sources are configured in `src/config.py`.
